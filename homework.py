@@ -1,4 +1,4 @@
-import logging as lgg
+import logging
 import os
 import time
 from logging.handlers import RotatingFileHandler
@@ -8,8 +8,8 @@ import telegram
 from dotenv import load_dotenv
 
 load_dotenv()
-lgg.basicConfig(
-    level=lgg.DEBUG,
+logging.basicConfig(
+    level=logging.DEBUG,
     format='%(asctime)s, %(levelname)s, %(message)s, %(processName)s',
     filename='main.log',
     filemode='a'
@@ -42,8 +42,8 @@ def get_homework_statuses(current_timestamp):
 
 
 def send_message(message, bot_client):
-    logger = lgg.getLogger(__name__)
-    logger.setLevel(lgg.INFO)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
     handler = RotatingFileHandler('main.log', maxBytes=(5 * pow(10, 6)),
                                   backupCount=10)
     logger.addHandler(handler)
