@@ -16,7 +16,7 @@ HEADERS = {'Authorization': 'OAuth ' + PRAKTIKUM_TOKEN}
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 LOGGING_FORMAT = '%(asctime)s, %(levelname)s, %(message)s, %(processName)s'
-ROOT_PATH = os.path.expanduser('~')
+HOME_PATH = os.path.expanduser('~')
 LOG_FOLDER = 'log_journal'
 RESPONSE_ERRORS = ['error', 'code']
 VERDICTS = {'rejected': 'К сожалению в работе нашлись ошибки.',
@@ -30,10 +30,10 @@ UNKNOWN_RESPONSE = 'Неожиданный ответ от сервера: {erro
 
 
 def make_logfile_path():
-    os.chdir(ROOT_PATH)
+    os.chdir(HOME_PATH)
     if not os.path.isdir(LOG_FOLDER):
         os.mkdir(LOG_FOLDER)
-    return ROOT_PATH + '/' + LOG_FOLDER + '/' + __name__ + '.log'
+    return HOME_PATH + '/' + LOG_FOLDER + '/' + __name__ + '.log'
 
 
 def parse_homework_status(homework):
