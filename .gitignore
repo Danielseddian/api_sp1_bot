@@ -153,3 +153,6 @@ static/
 posts/static/
 media/
 
+# дополнительные файлы разработки
+test.py
+
