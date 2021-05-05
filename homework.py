@@ -1,7 +1,6 @@
 import logging
 import os
 import time
-# from logging.handlers import RotatingFileHandler
 
 import requests
 import telegram
@@ -56,7 +55,9 @@ def get_response(current_timestamp):
         response = requests.get(URL, params=data, headers=HEADERS).json()
         for error in RESPONSE_ERRORS:
             if error in response:
-                logging.error(UNKNOWN_RESPONSE.format(error=response[error]))
+                unknown_response = response[error]
+                logging.error(UNKNOWN_RESPONSE.format(error=unknown_response))
+                return unknown_response
     except Exception as exception:
         response = exception
     return response
@@ -88,13 +89,12 @@ def main():
             time.sleep(300)
 
         except Exception as exception:
-            logger = logging.getLogger()
-            logger.error(exception)
+            logging.error(exception)
             try:
                 send_message(BOT_ERROR.format(exception=exception), bot_client)
             except Exception as send_exception:
                 if str(send_exception) != str(exception):
-                    logger.error(send_exception)
+                    logging.error(send_exception)
             time.sleep(5)
 
 
