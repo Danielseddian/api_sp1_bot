@@ -88,7 +88,7 @@ def main():
             logging.error(exception)
             try:
                 send_message(BOT_ERROR.format(exception=exception), bot_client)
-            except Exception as send_exception:
+            except:
                 raise ConnectionError(SEND_ERROR)
             time.sleep(5)
 
