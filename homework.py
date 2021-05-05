@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 PRAKTIKUM_TOKEN = os.getenv("PRAKTIKUM_TOKEN")
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 HEADERS = {'Authorization': 'OAuth ' + PRAKTIKUM_TOKEN}
@@ -60,7 +61,7 @@ def main():
         try:
             new_homework = get_homework_statuses(current_timestamp)
             for error in RESPONSE_ERRORS:
-                if new_homework[error]:
+                if new_homework.get(error):
                     raise ValueError(EXPECTED_FAILURE.format(
                         error=new_homework[error]
                     ))
@@ -86,13 +87,11 @@ if __name__ == '__main__':
     HOME_PATH = os.path.expanduser('~')
     LOG_FOLDER = 'log_journal'
 
-
     def make_logfile_path():
         os.chdir(HOME_PATH)
         if not os.path.isdir(LOG_FOLDER):
             os.mkdir(LOG_FOLDER)
         return f'{HOME_PATH}/{LOG_FOLDER}/{__name__}.log'
-
 
     logging.basicConfig(
         level=logging.DEBUG,
