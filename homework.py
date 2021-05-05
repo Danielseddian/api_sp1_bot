@@ -44,7 +44,8 @@ def parse_homework_status(homework):
 
     except Exception as exception:
         raise ValueError(UNKNOWN_RESPONSE.format(exception=exception))
-    return CHECKED.format(homework_name=name, verdict=verdict)
+    return CHECKED.format(homework_name=homework['homework_name'],
+                          verdict=VERDICTS[homework['status']])
 
 
 def get_homework_statuses(current_timestamp):
