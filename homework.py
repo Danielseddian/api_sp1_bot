@@ -92,12 +92,10 @@ if __name__ == '__main__':
         if not os.path.isdir(LOG_FOLDER):
             os.mkdir(LOG_FOLDER)
         return f'{HOME_PATH}/{LOG_FOLDER}/{__name__}.log'
-
     logging.basicConfig(
         level=logging.DEBUG,
         format=LOGGING_FORMAT,
         filename=make_logfile_path(),
         filemode='a'
     )
-
     main()
