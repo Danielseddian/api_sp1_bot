@@ -37,16 +37,12 @@ def make_logfile_path():
 
 def parse_homework_status(homework):
     try:
-        homework_name = homework['homework_name']
-        status = homework['status']
-        if status in VERDICTS:
-            verdict = VERDICTS[status]
-            return CHECKED.format(homework_name=homework_name,
-                                  verdict=verdict)
-        return UNKNOWN_STATUS.format(status=status)
+        status = CHECKED.format(homework_name=homework['homework_name'],
+                                verdict=VERDICTS[homework['status']])
 
     except Exception as exception:
-        return BOT_ERROR.format(exception=exception)
+        status = BOT_ERROR.format(exception=exception)
+    return status
 
 
 def get_homework_statuses(current_timestamp):
