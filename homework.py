@@ -22,7 +22,7 @@ VERDICTS = {'rejected': 'К сожалению в работе нашлись о
             'reviewing': 'Работа взята на проверку',
             'approved': 'Ревьюеру всё понравилось, можно приступать '
                         'к следующему уроку.'}
-CHECKED = 'Проверена работа "{homework_name}"!\n\n{verdict}'
+CHECKED = 'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 UNKNOWN_STATUS = 'Неизвестный статус:\n\n{status}'
 BOT_ERROR = 'Бот столкнулся с ошибкой:\n\n{exception}'
 UNKNOWN_RESPONSE = 'Неожиданный ответ от сервера: {error}'
