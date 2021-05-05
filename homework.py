@@ -24,8 +24,10 @@ VERDICTS = {'rejected': 'К сожалению в работе нашлись о
                         'к следующему уроку.'}
 CHECKED = 'Проверена работа "{homework_name}"!\n\n{verdict}'
 UNKNOWN_STATUS = 'Неизвестный статус:\n\n{status}'
-BOT_ERROR = 'Бот столкнулся с ошибкой: {exception}'
+BOT_ERROR = 'Бот столкнулся с ошибкой:\n\n{exception}'
 UNKNOWN_RESPONSE = 'Неожиданный ответ от сервера: {error}'
+CONNECTION_ERROR = 'Ошибка соединения:\n\n{exception}'
+SEND_ERROR = 'Ошибка отправки сообщения'
 
 
 def make_logfile_path():
@@ -37,12 +39,12 @@ def make_logfile_path():
 
 def parse_homework_status(homework):
     try:
-        status = CHECKED.format(homework_name=homework['homework_name'],
-                                verdict=VERDICTS[homework['status']])
+        name = homework['homework_name']
+        verdict = VERDICTS[homework['status']]
 
     except Exception as exception:
-        status = BOT_ERROR.format(exception=exception)
-    return status
+        raise ValueError(UNKNOWN_RESPONSE.format(exception=exception))
+    return CHECKED.format(homework_name=name, verdict=verdict)
 
 
 def get_homework_statuses(current_timestamp):
@@ -51,11 +53,9 @@ def get_homework_statuses(current_timestamp):
         response = requests.get(URL, params=data, headers=HEADERS).json()
         for error in RESPONSE_ERRORS:
             if error in response:
-                unknown_response = response[error]
-                logging.error(UNKNOWN_RESPONSE.format(error=unknown_response))
-                return unknown_response
+                raise ValueError(UNKNOWN_RESPONSE.format(error=response[error]))
     except Exception as exception:
-        response = exception
+        raise ConnectionError(CONNECTION_ERROR.format(exception=exception))
     return response
 
 
@@ -70,7 +70,7 @@ def main():
         filename=make_logfile_path(),
         filemode='a'
     )
-    current_timestamp = int(time.time())
+    current_timestamp = 0  # int(time.time())
     bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
 
     while True:
@@ -89,8 +89,7 @@ def main():
             try:
                 send_message(BOT_ERROR.format(exception=exception), bot_client)
             except Exception as send_exception:
-                if str(send_exception) != str(exception):
-                    logging.error(send_exception)
+                raise ConnectionError(SEND_ERROR)
             time.sleep(5)
 
 
