@@ -49,7 +49,7 @@ def parse_homework_status(homework):
         return BOT_ERROR.format(exception=exception)
 
 
-def get_response(current_timestamp):
+def get_homework_statuses(current_timestamp):
     data = {'from_date': current_timestamp}
     try:
         response = requests.get(URL, params=data, headers=HEADERS).json()
@@ -79,7 +79,7 @@ def main():
 
     while True:
         try:
-            new_homework = get_response(current_timestamp)
+            new_homework = get_homework_statuses(current_timestamp)
             if new_homework.get('homeworks'):
                 send_message(parse_homework_status(
                     new_homework.get('homeworks')[0]), bot_client
