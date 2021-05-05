@@ -70,7 +70,7 @@ def main():
         filename=make_logfile_path(),
         filemode='a'
     )
-    current_timestamp = 0  # int(time.time())
+    current_timestamp = int(time.time())
     bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
 
     while True:
