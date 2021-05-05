@@ -53,7 +53,9 @@ def get_homework_statuses(current_timestamp):
         response = requests.get(URL, params=data, headers=HEADERS).json()
         for error in RESPONSE_ERRORS:
             if error in response:
-                raise ValueError(UNKNOWN_RESPONSE.format(error=response[error]))
+                raise ValueError(
+                    UNKNOWN_RESPONSE.format(error=response[error])
+                )
     except Exception as exception:
         raise ConnectionError(CONNECTION_ERROR.format(exception=exception))
     return response
@@ -88,7 +90,7 @@ def main():
             logging.error(exception)
             try:
                 send_message(BOT_ERROR.format(exception=exception), bot_client)
-            except:
+            except Exception:
                 raise ConnectionError(SEND_ERROR)
             time.sleep(5)
 
