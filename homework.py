@@ -11,20 +11,20 @@ load_dotenv()
 
 PRAKTIKUM_TOKEN = os.getenv("PRAKTIKUM_TOKEN")
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-HEADERS = {'Authorization': 'OAuth ' + PRAKTIKUM_TOKEN}
+HEADERS = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
-RESPONSE_ERRORS = ['error', 'code']
+ERROR_CODES = ['error', 'code']
 VERDICTS = {'rejected': 'К сожалению в работе нашлись ошибки.',
             'reviewing': 'Работа взята на проверку',
             'approved': 'Ревьюеру всё понравилось, можно приступать '
                         'к следующему уроку.'}
 CHECKED = 'У вас проверили работу "{name}"!\n\n{verdict}'
-UNKNOWN_STATUS = 'Неизвестный статус работы: {status}'
-BOT_ERROR = 'Бот столкнулся с ошибкой: {exception}'
-EXPECTED_FAILURE = 'Ожидаемые ошибки сервера: {error}'
-CONNECTION_ERROR = ('Ошибка соединения: {exception} по адресу: {url} '
-                    'с параметрами: {params}')
+STATUS_ERROR = 'Неизвестный статус работы: {status}'
+BOT_ERROR = 'Бот столкнулся с ошибкой: {error}'
+RESPONSE_ERROR = 'Сервер вернул ошибку: {error}'
+CONNECTION_ERROR = ('Ошибка соединения: {error} по адресу: {url} '
+                    'с параметрами: {params} и {headers}')
 SEND_ERROR = 'Ошибка отправки сообщения: {error}'
 
 
@@ -32,21 +32,24 @@ def get_homework_statuses(current_timestamp):
     data = {'from_date': current_timestamp}
     try:
         response = requests.get(URL, params=data, headers=HEADERS)
-    except Exception as exception:
-        raise ConnectionError(
-            CONNECTION_ERROR.format(exception=exception, url=URL,
-                                    params=data))
-    return response.json()
+    except requests.exceptions.RequestException as error:
+        raise ConnectionError(CONNECTION_ERROR.format(
+            error=error, url=URL, params=data, headers=HEADERS))
+    content = response.json()
+    for error in ERROR_CODES:
+        if error in content:
+            raise ValueError(RESPONSE_ERROR.format(
+                error=content[error]
+            ))
+    return content
 
 
 def parse_homework_status(homework):
-    name = homework['homework_name']
     status = homework['status']
-    if status in VERDICTS:
-        verdict = VERDICTS[status]
-    else:
-        raise ValueError(UNKNOWN_STATUS.format(status=status))
-    return CHECKED.format(name=name, verdict=verdict)
+    if status not in VERDICTS:
+        raise ValueError(STATUS_ERROR.format(status=status))
+    return CHECKED.format(name=homework['homework_name'],
+                          verdict=VERDICTS[status])
 
 
 def send_message(message, bot_client):
@@ -64,19 +67,15 @@ def main():
                 send_message(parse_homework_status(
                     new_homework.get('homeworks')[0]), bot_client
                 )
-            for error in RESPONSE_ERRORS:
-                if new_homework.get(error):
-                    raise ValueError(EXPECTED_FAILURE.format(
-                        error=new_homework[error]
-                    ))
             current_timestamp = new_homework.get('current_date',
                                                  current_timestamp)
             time.sleep(300)
 
-        except Exception as exception:
-            logging.error(BOT_ERROR.format(exception=exception), exc_info=True)
+        except Exception as error:
+            error = BOT_ERROR.format(error=error)
+            logging.error(error, exc_info=True)
             try:
-                send_message(BOT_ERROR.format(exception=exception), bot_client)
+                send_message(error, bot_client)
             except Exception as send_exception:
                 logging.error(SEND_ERROR.format(error=send_exception),
                               exc_info=True)
@@ -88,10 +87,10 @@ if __name__ == '__main__':
     HOME_PATH = os.path.expanduser('~')
     LOG_FOLDER = 'log_journal'
 
+
     def make_logfile_path():
-        os.chdir(HOME_PATH)
-        if not os.path.isdir(LOG_FOLDER):
-            os.mkdir(LOG_FOLDER)
+        if not os.path.isdir(f'{HOME_PATH}/{LOG_FOLDER}'):
+            os.mkdir(f'{HOME_PATH}/{LOG_FOLDER}')
         return f'{HOME_PATH}/{LOG_FOLDER}/{__name__}.log'
     logging.basicConfig(
         level=logging.DEBUG,
