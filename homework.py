@@ -25,17 +25,7 @@ BOT_ERROR = 'Бот столкнулся с ошибкой: {exception}'
 EXPECTED_FAILURE = 'Ожидаемые ошибки сервера: {error}'
 CONNECTION_ERROR = ('Ошибка соединения: {exception} по адресу: {url} '
                     'с параметрами: {params}')
-SEND_ERROR = 'Ошибка отправки сообщения'
-
-
-def parse_homework_status(homework):
-    name = homework['homework_name']
-    status = homework['status']
-    if status in VERDICTS:
-        verdict = VERDICTS[status]
-    else:
-        raise ValueError(UNKNOWN_STATUS.format(status=status))
-    return CHECKED.format(name=name, verdict=verdict)
+SEND_ERROR = 'Ошибка отправки сообщения: {error}'
 
 
 def get_homework_statuses(current_timestamp):
@@ -47,6 +37,16 @@ def get_homework_statuses(current_timestamp):
             CONNECTION_ERROR.format(exception=exception, url=URL,
                                     params=data))
     return response.json()
+
+
+def parse_homework_status(homework):
+    name = homework['homework_name']
+    status = homework['status']
+    if status in VERDICTS:
+        verdict = VERDICTS[status]
+    else:
+        raise ValueError(UNKNOWN_STATUS.format(status=status))
+    return CHECKED.format(name=name, verdict=verdict)
 
 
 def send_message(message, bot_client):
@@ -77,8 +77,9 @@ def main():
             logging.error(BOT_ERROR.format(exception=exception), exc_info=True)
             try:
                 send_message(BOT_ERROR.format(exception=exception), bot_client)
-            except Exception:
-                logging.error(SEND_ERROR, exc_info=True)
+            except Exception as send_exception:
+                logging.error(SEND_ERROR.format(error=send_exception),
+                              exc_info=True)
             time.sleep(5)
 
 
