@@ -60,15 +60,15 @@ def main():
     while True:
         try:
             new_homework = get_homework_statuses(current_timestamp)
+            if new_homework.get('homeworks'):
+                send_message(parse_homework_status(
+                    new_homework.get('homeworks')[0]), bot_client
+                )
             for error in RESPONSE_ERRORS:
                 if new_homework.get(error):
                     raise ValueError(EXPECTED_FAILURE.format(
                         error=new_homework[error]
                     ))
-            if new_homework.get('homeworks'):
-                send_message(parse_homework_status(
-                    new_homework.get('homeworks')[0]), bot_client
-                )
             current_timestamp = new_homework.get('current_date',
                                                  current_timestamp)
             time.sleep(300)
