@@ -87,15 +87,16 @@ if __name__ == '__main__':
     HOME_PATH = os.path.expanduser('~')
     LOG_FOLDER = 'log_journal'
 
-
     def make_logfile_path():
         if not os.path.isdir(f'{HOME_PATH}/{LOG_FOLDER}'):
             os.mkdir(f'{HOME_PATH}/{LOG_FOLDER}')
         return f'{HOME_PATH}/{LOG_FOLDER}/{__name__}.log'
+
     logging.basicConfig(
         level=logging.DEBUG,
         format=LOGGING_FORMAT,
         filename=make_logfile_path(),
         filemode='a'
     )
+
     main()
