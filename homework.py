@@ -22,25 +22,26 @@ VERDICTS = {'rejected': 'К сожалению в работе нашлись о
 CHECKED = 'У вас проверили работу "{name}"!\n\n{verdict}'
 STATUS_ERROR = 'Неизвестный статус работы: {status}'
 BOT_ERROR = 'Бот столкнулся с ошибкой: {error}'
-RESPONSE_ERROR = 'Сервер вернул ошибку: {error}'
+RESPONSE_ERROR = ('Сервер: {URL} с параметрами: {params} и '
+                  '{headers} вернул ошибку: {error}')
 CONNECTION_ERROR = ('Ошибка соединения: {error} по адресу: {url} '
                     'с параметрами: {params} и {headers}')
 SEND_ERROR = 'Ошибка отправки сообщения: {error}'
 
 
 def get_homework_statuses(current_timestamp):
-    data = {'from_date': current_timestamp}
+    data = dict(url=URL, params={'from_date': current_timestamp},
+                headers=HEADERS)
     try:
-        response = requests.get(URL, params=data, headers=HEADERS)
+        response = requests.get(**data)
     except requests.exceptions.RequestException as error:
         raise ConnectionError(CONNECTION_ERROR.format(
-            error=error, url=URL, params=data, headers=HEADERS))
+            error=error, **data))
     content = response.json()
     for error in ERROR_CODES:
         if error in content:
             raise ValueError(RESPONSE_ERROR.format(
-                error=content[error]
-            ))
+                error=content[error], **data))
     return content
 
 
@@ -84,18 +85,15 @@ def main():
 
 if __name__ == '__main__':
     LOGGING_FORMAT = '%(asctime)s, %(levelname)s, %(message)s, %(processName)s'
-    HOME_PATH = os.path.expanduser('~')
-    LOG_FOLDER = 'log_journal'
+    LOG_FOLDER = f'{os.path.expanduser("~")}/log_journal/{__name__}.log'
 
-    def make_logfile_path():
-        if not os.path.isdir(f'{HOME_PATH}/{LOG_FOLDER}'):
-            os.mkdir(f'{HOME_PATH}/{LOG_FOLDER}')
-        return f'{HOME_PATH}/{LOG_FOLDER}/{__name__}.log'
+    if not os.path.isdir(os.path.dirname(LOG_FOLDER)):
+        os.mkdir(os.path.dirname(LOG_FOLDER))
 
     logging.basicConfig(
         level=logging.DEBUG,
         format=LOGGING_FORMAT,
-        filename=make_logfile_path(),
+        filename=LOG_FOLDER,
         filemode='a'
     )
 
