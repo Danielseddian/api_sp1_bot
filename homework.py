@@ -60,6 +60,7 @@ def send_message(message, bot_client):
 def main():
     current_timestamp = int(time.time())
     bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
+    saved_error = None
 
     while True:
         try:
@@ -76,7 +77,9 @@ def main():
             error = BOT_ERROR.format(error=error)
             logging.error(error, exc_info=True)
             try:
-                send_message(error, bot_client)
+                if saved_error != str(error):
+                    saved_error = str(error)
+                    send_message(error, bot_client)
             except Exception as send_exception:
                 logging.error(SEND_ERROR.format(error=send_exception),
                               exc_info=True)
@@ -85,15 +88,15 @@ def main():
 
 if __name__ == '__main__':
     LOGGING_FORMAT = '%(asctime)s, %(levelname)s, %(message)s, %(processName)s'
-    LOG_FOLDER = f'{os.path.expanduser("~")}/log_journal/{__name__}.log'
+    LOG_FILE = f'{os.path.expanduser("~")}/log_journal/{__name__}.log'
 
-    if not os.path.isdir(os.path.dirname(LOG_FOLDER)):
-        os.mkdir(os.path.dirname(LOG_FOLDER))
+    if not os.path.isdir(os.path.dirname(LOG_FILE)):
+        os.mkdir(os.path.dirname(LOG_FILE))
 
     logging.basicConfig(
         level=logging.DEBUG,
         format=LOGGING_FORMAT,
-        filename=LOG_FOLDER,
+        filename=LOG_FILE,
         filemode='a'
     )
 
